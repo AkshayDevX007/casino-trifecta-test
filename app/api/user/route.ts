@@ -1,8 +1,8 @@
 import { connectToDatabase } from "@/lib/db/db";
 import { User } from "@/lib/db/models/user";
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcrypt";
 import { hashPassword } from "@/utils/hashPassword";
+
 
 // create user
 export async function POST(request: NextRequest) {
@@ -35,27 +35,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json(user, { status: 201 });
 }
 
-// verify user
-export async function VerifyUser(email: string, password: string) {
-  await connectToDatabase();
 
-  const user = await User.findOne({ email });
-
-  if (!user) {
-    return null;
-  }
-
-  const isPasswordValid = await bcrypt.compare(
-    password,
-    user.password as string
-  );
-
-  if (!isPasswordValid) {
-    return null
-  }
-
-  return user
-}
 
 // get all users
 export async function GET() {
