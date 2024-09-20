@@ -1,5 +1,5 @@
 "use client";
-import { signIn } from "@/app/api/auth/[...nextauth]/auth";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -24,12 +24,8 @@ export default function LoginForm() {
       password: data.password,
     });
 
-    if (response.ok) {
-        toast.success("Login successful")
-    }
-
-    if (!response.ok) {
-      toast.error("invalid credentials")
+    if (response?.status === 200) {
+      toast.success("Login successful");
     }
   };
 
