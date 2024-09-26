@@ -1,5 +1,7 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
@@ -12,7 +14,10 @@ interface RegisterProps {
 
 export default function RegisterForm() {
   const { register, formState: { errors }, handleSubmit } = useForm<RegisterProps>();
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const onSubmit: SubmitHandler<RegisterProps> = async (data) => {
+    setLoading(true);
     const response = await fetch("/api/user", {
       method: "POST",
       headers: {
@@ -24,18 +29,24 @@ export default function RegisterForm() {
 
     if (!response.ok) {
       toast.error(result.message);
+      setLoading(false);
+      return;
     }
 
     if (response.status === 201) {
+      router.push("/auth/login");
       toast.success("User registered successfully!");
+      setLoading(false);
+
+      return;
     }
   };
   return (
     <>
-      <div className="flex items-center justify-center min-h-screen bg-sky-700">
+      <div className="flex items-center justify-center min-h-screen">
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="p-10 rounded-md shadow-md bg-sky-900"
+          className="p-10 rounded-md shadow-md"
         >
           <label className="input input-bordered flex items-center gap-2 mb-4">
             <svg
@@ -93,7 +104,7 @@ export default function RegisterForm() {
             />
           </label>
           {errors.password && <p role="alert" className="text-red-500 text-sm -mt-6 mb-5">{errors.password.message}</p>}
-          <button type="submit" className="btn btn-primary w-full">Register</button>
+          <button disabled={loading} type="submit" className="btn btn-primary w-full">{loading ? <span className="loading loading-spinner loading-md"></span> : ""}Register</button>
           <p className="text-center mt-4">Already have an account? <Link href="/auth/login" className="hover:underline">Login here</Link></p>
         </form>
       </div>

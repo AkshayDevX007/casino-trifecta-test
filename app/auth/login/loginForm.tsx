@@ -1,6 +1,7 @@
 "use client";
-import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
@@ -10,31 +11,44 @@ interface LoginProps {
 }
 
 export default function LoginForm() {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const {
     register,
     formState: { errors },
     handleSubmit,
   } = useForm<LoginProps>();
   const onSubmit: SubmitHandler<LoginProps> = async (data) => {
-    console.log(data);
-
-    const response = await signIn("credentials", {
-      redirect: false,
-      email: data.email,
-      password: data.password,
+    setLoading(true);
+    const response = await fetch("/api/user/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
     });
+    const result = await response.json();
 
-    if (response?.status === 200) {
-      toast.success("Login successful");
+    if (!response.ok) {
+      toast.error(result.message);
+      setLoading(false);
+      return;
+    }
+
+    if (response.status === 200) {
+      toast.success("Logged in successfully!");
+      setLoading(false);
+      router.push("/");
+      return;
     }
   };
 
   return (
     <>
-      <div className="flex items-center justify-center min-h-screen bg-sky-700">
+      <div className="flex items-center justify-center min-h-screen">
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="p-10 rounded-md shadow-md bg-sky-900"
+          className="p-10 rounded-md shadow-m"
         >
           <label className="input input-bordered flex items-center gap-2 mb-4">
             <svg
@@ -83,7 +97,16 @@ export default function LoginForm() {
               {errors.password.message}
             </p>
           )}
-          <button type="submit" className="btn btn-primary w-full">
+          <button
+            type="submit"
+            className="btn btn-primary w-full"
+            disabled={loading}
+          >
+            {loading ? (
+              <span className="loading loading-spinner loading-md"></span>
+            ) : (
+              ""
+            )}
             Login
           </button>
           <p className="text-center mt-4">

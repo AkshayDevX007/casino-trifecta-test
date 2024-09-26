@@ -3,7 +3,6 @@ import { User } from "@/lib/db/models/user";
 import { NextRequest, NextResponse } from "next/server";
 import { hashPassword } from "@/utils/hashPassword";
 
-
 // create user
 export async function POST(request: NextRequest) {
   await connectToDatabase();
@@ -30,12 +29,14 @@ export async function POST(request: NextRequest) {
 
   const hashedPassword = await hashPassword(password);
 
-  const user = await User.create({ name, email, password: hashedPassword });
+  const user = await User.create({
+    name,
+    email,
+    password: hashedPassword,
+  });
 
   return NextResponse.json(user, { status: 201 });
 }
-
-
 
 // get all users
 export async function GET() {
